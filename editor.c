@@ -1,8 +1,8 @@
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 #define MAX_SIZE 1000
-#define MAX_WORDS 100
 #define MAX_WORD_LEN 50
 
 // =======================
@@ -41,12 +41,40 @@ char pop(Stack *s) {
     return '\0';
 }
 
-// ==============================
-// Vetor de palavras desfeitas
-// ==============================
+// =======================
+// Lista ligada para redo
+// =======================
 
-char redoWords[MAX_WORDS][MAX_WORD_LEN];
-int redoWordCount = 0;
+typedef struct WordNode {
+    char word[MAX_WORD_LEN];
+    struct WordNode* next;
+} WordNode;
+
+WordNode* redoHead = NULL;  // topo da pilha de palavras desfeitas
+
+void pushRedoWord(const char* word) {
+    WordNode* node = (WordNode*)malloc(sizeof(WordNode));
+    strcpy(node->word, word);
+    node->next = redoHead;
+    redoHead = node;
+}
+
+char* popRedoWord() {
+    if (redoHead == NULL) return NULL;
+    WordNode* temp = redoHead;
+    redoHead = redoHead->next;
+    char* result = strdup(temp->word);  // copia a palavra antes de liberar
+    free(temp);
+    return result;
+}
+
+void clearRedoList() {
+    while (redoHead != NULL) {
+        WordNode* temp = redoHead;
+        redoHead = redoHead->next;
+        free(temp);
+    }
+}
 
 // =======================
 // Funções principais
@@ -54,13 +82,13 @@ int redoWordCount = 0;
 
 void insertChar(char c) {
     push(&textStack, c);
-    redoWordCount = 0;  // limpa histórico de redo
+    clearRedoList();  // limpa histórico de redo ao digitar
 }
 
 void backspaceChar() {
     if (!isEmpty(&textStack)) {
         pop(&textStack);
-        redoWordCount = 0;  // limpa histórico de redo
+        clearRedoList();  // limpa histórico de redo ao apagar
     }
 }
 
@@ -73,9 +101,9 @@ const char* getText() {
     return buffer;
 }
 
-// Desfaz uma palavra e salva no vetor
+// Desfaz uma palavra e salva na lista ligada
 void undoWord() {
-    if (isEmpty(&textStack) || redoWordCount >= MAX_WORDS) return;
+    if (isEmpty(&textStack)) return;
 
     char word[MAX_WORD_LEN];
     int i = 0;
@@ -87,28 +115,30 @@ void undoWord() {
         if (isspace(c)) break;
     }
 
-    // Inverte a palavra para armazenar corretamente
-    for (int j = 0; j < i; j++) {
-        redoWords[redoWordCount][j] = word[i - j - 1];
+    // Inverter para armazenar corretamente
+    for (int j = 0; j < i / 2; j++) {
+        char temp = word[j];
+        word[j] = word[i - j - 1];
+        word[i - j - 1] = temp;
     }
-    redoWords[redoWordCount][i] = '\0';
-    redoWordCount++;
+    word[i] = '\0';
+
+    pushRedoWord(word);
 }
 
-// Refaz a última palavra desfeita
+// Refaz a última palavra da lista ligada
 void redoWord() {
-    if (redoWordCount <= 0) return;
-
-    redoWordCount--;
-    char* word = redoWords[redoWordCount];
+    char* word = popRedoWord();
+    if (!word) return;
 
     for (int i = 0; word[i] != '\0'; i++) {
         push(&textStack, word[i]);
     }
+    free(word);  // liberar a cópia
 }
 
 // Inicializa o editor
 void initEditor() {
     initStack(&textStack);
-    redoWordCount = 0;
+    clearRedoList();
 }
