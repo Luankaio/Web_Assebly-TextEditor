@@ -42,7 +42,7 @@ char pop(Stack *s) {
 }
 
 // =======================
-// Lista ligada para redo
+// linked list para redo
 // =======================
 
 typedef struct WordNode {
