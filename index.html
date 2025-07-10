@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editor C com WebAssembly</title>
+  <style>
+    #output {
+      border: 1px solid #ccc;
+      min-height: 150px;
+      padding: 10px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      background: #fff;
+    }
+
+    .buttons {
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 8px 12px;
+      margin-right: 5px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Editor C com WebAssembly</h2>
+
+  <div id="output" contenteditable="true"></div>
+
+  <div class="buttons">
+    <button id="undoBtn">Desfazer</button>
+    <button id="redoBtn">Refazer</button>
+  </div>
+
+  <script src="editor.js"></script>
+  <script>
+    let insertChar, backspaceChar, getText, undoWord, redoWord, initEditor;
+
+    const output = document.getElementById('output');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+
+    Module.onRuntimeInitialized = function () {
+      insertChar = Module.cwrap('insertChar', null, ['number']);
+      backspaceChar = Module.cwrap('backspaceChar', null, []);
+      getText = Module.cwrap('getText', 'string', []);
+      undoWord = Module.cwrap('undoWord', null, []);
+      redoWord = Module.cwrap('redoWord', null, []);
+      initEditor = Module.cwrap('initEditor', null, []);
+      initEditor();
+
+      // Entrada de texto
+      output.addEventListener('keydown', (e) => {
+        e.preventDefault();
+
+        if (e.key === 'Backspace') {
+          backspaceChar();
+        } else if (e.key.length === 1) {
+          insertChar(e.key.charCodeAt(0));
+        }
+
+        atualizarTexto();
+      });
+
+      
+      undoBtn.addEventListener('click', () => {
+        undoWord();
+        atualizarTexto();
+      });
+
+      redoBtn.addEventListener('click', () => {
+        redoWord();
+        atualizarTexto();
+      });
+    };
+
+    function atualizarTexto() {
+      output.innerText = getText();
+      placeCaretAtEnd(output);
+    }
+
+    function placeCaretAtEnd(el) {
+      el.focus();
+      if (typeof window.getSelection != "undefined"
+        && typeof document.createRange != "undefined") {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        range.collapse(false);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+    }
+  </script>
+</body>
+</html>
