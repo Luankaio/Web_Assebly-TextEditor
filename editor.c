@@ -1,5 +1,4 @@
 #include <string.h>
-#include <ctype.h>
 #include <stdlib.h>
 
 #define MAX_SIZE 1000
@@ -112,7 +111,7 @@ void undoWord() {
     while (!isEmpty(&textStack) && i < MAX_WORD_LEN - 1) {
         char c = pop(&textStack);
         word[i++] = c;
-        if (isspace(c)) break;
+        if (c == ' ' || c == '\t' || c == '\n') break;
     }
 
     // Inverter para armazenar corretamente
