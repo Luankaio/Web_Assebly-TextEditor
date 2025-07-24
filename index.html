@@ -212,10 +212,18 @@
         atualizarTexto();
       });
 
-      
+      saveBtn.addEventListener('click', () => {
+        salvarComoTxt();
+      });
 
       // Atalho Ctrl+S para salvar
-      
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          salvarComoTxt();
+        }
+      });
+    };
 
     function atualizarTexto() {
       output.innerText = getText();
@@ -242,7 +250,18 @@
       }
     }
 
-    
+   function salvarComoTxt() {
+      const texto = getText();
+      const blob = new Blob([texto], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'meu-texto.txt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } 
   </script>
 </body>
 </html>
