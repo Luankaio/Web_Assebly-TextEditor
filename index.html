@@ -17,7 +17,35 @@
       transition: background 0.5s;
     }
 
-   
+   h2 {
+      font-size: 2.2rem;
+      color: #222c3c;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px #e0e7ef;
+      animation: fadeInDown 0.7s cubic-bezier(.39,.575,.56,1.000);
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    #editor-container {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+      padding: 32px 28px 18px 28px;
+      min-width: 350px;
+      max-width: 80%;
+      width: 100%;
+      min-height: 35px;
+      max-height: 50%;
+      height: 100%;
+      margin-bottom: 18px;
+      animation: fadeIn 1s cubic-bezier(.39,.575,.56,1.000);
+      transition: box-shadow 0.3s;
+    }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.97); }
