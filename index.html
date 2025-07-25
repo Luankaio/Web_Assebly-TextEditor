@@ -250,7 +250,7 @@
       }
     }
 
-    function salvarComoTxt() {
+   function salvarComoTxt() {
       const texto = getText();
       const blob = new Blob([texto], { type: 'text/plain' });
       const url = window.URL.createObjectURL(blob);
@@ -261,7 +261,7 @@
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    }
+    } 
   </script>
 </body>
 </html>
