@@ -5,7 +5,7 @@
   <title>Editor C com WebAssembly</title>
   <style>
     body {
-      background: linear-gradient(120deg, #f0f4f8 0%, #e0e7ef 100%);
+      background: linear-gradient(120deg, #1e1e2f 0%, #2d2d44 100%);
       min-height: 100vh;
       margin: 0;
       font-family: 'Segoe UI', Arial, sans-serif;
@@ -14,162 +14,127 @@
       align-items: center;
       justify-content: flex-start;
       padding-top: 40px;
-      transition: background 0.5s;
+      color: #f1f1f1;
     }
 
-   h2 {
+    h2 {
       font-size: 2.2rem;
-      color: #222c3c;
+      color: #ffffff;
       margin-bottom: 18px;
-      letter-spacing: 1px;
-      text-shadow: 0 2px 8px #e0e7ef;
-      animation: fadeInDown 0.7s cubic-bezier(.39,.575,.56,1.000);
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-30px); }
-      to { opacity: 1; transform: translateY(0); }
+      text-shadow: 0 2px 10px #000;
     }
 
     #editor-container {
-      background: #fff;
+      background: #2b2b3c;
       border-radius: 18px;
-      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
-      padding: 32px 28px 18px 28px;
-      min-width: 350px;
-      max-width: 80%;
-      width: 100%;
-      min-height: 35px;
-      max-height: 50%;
-      height: 100%;
-      margin-bottom: 18px;
-      animation: fadeIn 1s cubic-bezier(.39,.575,.56,1.000);
-      transition: box-shadow 0.3s;
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.3);
+      padding: 28px;
+      width: 90%;
+      max-width: 800px;
+      margin-bottom: 20px;
     }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.97); }
-      to { opacity: 1; transform: scale(1); }
+    .toolbar {
+      display: flex;
+      justify-content: start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .toolbar button {
+      padding: 6px 14px;
+      background: #44485b;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toolbar button:hover {
+      background: #5c6bc0;
     }
 
     #output {
       border: none;
       outline: none;
-      min-height: 350px;
+      min-height: 250px;
       padding: 16px;
-      font-family: 'Fira Mono', 'Consolas', monospace;
-      font-size: 1.08rem;
-      background: #f7fafd;
+      background: #1e1e2f;
       border-radius: 10px;
-      box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.06);
-      margin-bottom: 10px;
-      transition: box-shadow 0.3s, background 0.3s;
-      color: #222c3c;
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: #ffffff;
+      box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.05);
       resize: vertical;
-      max-height: 700px;
-      overflow-y: auto;
-    }
-    #output:focus {
-      background: #eaf3ff;
-      box-shadow: 0 0 0 2px #4caf50a0;
     }
 
     .editor-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
-      font-size: 0.98rem;
-      color: #6a7a8c;
-      padding: 0 2px;
-      min-height: 24px;
+      font-size: 0.95rem;
+      color: #ccc;
+      margin-top: 10px;
     }
 
     .buttons {
       display: flex;
       justify-content: flex-end;
       gap: 10px;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
     button {
-      padding: 10px 18px;
+      padding: 10px 16px;
       font-size: 15px;
-      cursor: pointer;
       border: none;
       border-radius: 6px;
-      background: #e3eaf3;
-      color: #222c3c;
-      box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.06);
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      cursor: pointer;
       font-weight: 500;
-      outline: none;
-      position: relative;
-      overflow: hidden;
     }
-    button:active {
-      transform: scale(0.97);
-    }
-    button:hover {
-      background: #d0e2ff;
-      box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
-    }
+
     #saveBtn {
-      background: linear-gradient(90deg, #4CAF50 60%, #43e97b 100%);
+      background: linear-gradient(90deg, #4CAF50, #43e97b);
       color: white;
-      font-weight: 600;
-      box-shadow: 0 2px 12px 0 rgba(76, 175, 80, 0.10);
-      border: none;
     }
-    #saveBtn:hover {
-      background: linear-gradient(90deg, #43e97b 60%, #38f9d7 100%);
-      color: #fff;
-    }
+
     #undoBtn, #redoBtn {
-      min-width: 90px;
+      background: #888ca1;
+      color: white;
     }
-    #undoBtn:before {
-      content: "⎌ ";
-      font-size: 1.1em;
-      vertical-align: middle;
-    }
-    #redoBtn:before {
-      content: "↻ ";
-      font-size: 1.1em;
-      vertical-align: middle;
-    }
-    #saveBtn:before {
-      content: "💾 ";
-      font-size: 1.1em;
-      vertical-align: middle;
-    }
+
     .char-count {
       font-size: 0.95em;
-      color: #8ca0b3;
-      letter-spacing: 0.5px;
-      transition: color 0.2s;
-      user-select: none;
+      color: #aaa;
     }
+
     .char-count.warning {
-      color: #e57373;
-      font-weight: 600;
+      color: #ff5252;
     }
   </style>
 </head>
 <body>
   <h2>Editor C com WebAssembly</h2>
   <div id="editor-container">
+    <div class="toolbar">
+      <button onclick="formatText('bold')"><b>B</b></button>
+      <button onclick="formatText('italic')"><i>I</i></button>
+      <button onclick="formatText('underline')"><u>U</u></button>
+    </div>
     <div id="output" contenteditable="true"></div>
     <div class="editor-footer">
       <span class="char-count" id="charCount">0 caracteres</span>
-      <span style="font-size:0.95em;opacity:0.7;">Ctrl+S para salvar</span>
+      <span style="opacity:0.7;">Ctrl+S para salvar</span>
     </div>
     <div class="buttons">
-      <button id="undoBtn">Desfazer</button>
-      <button id="redoBtn">Refazer</button>
-      <button id="saveBtn">Salvar como TXT</button>
+      <button id="undoBtn">⎌ Desfazer</button>
+      <button id="redoBtn">↻ Refazer</button>
+      <button id="saveBtn">💾 Salvar como TXT</button>
     </div>
   </div>
+
   <script src="editor.js"></script>
   <script>
     let insertChar, backspaceChar, getText, undoWord, redoWord, initEditor;
@@ -189,16 +154,13 @@
       initEditor = Module.cwrap('initEditor', null, []);
       initEditor();
 
-      // Entrada de texto
       output.addEventListener('keydown', (e) => {
         e.preventDefault();
-
         if (e.key === 'Backspace') {
           backspaceChar();
         } else if (e.key.length === 1) {
           insertChar(e.key.charCodeAt(0));
         }
-
         atualizarTexto();
       });
 
@@ -216,7 +178,6 @@
         salvarComoTxt();
       });
 
-      // Atalho Ctrl+S para salvar
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
           e.preventDefault();
@@ -239,8 +200,7 @@
 
     function placeCaretAtEnd(el) {
       el.focus();
-      if (typeof window.getSelection != "undefined"
-        && typeof document.createRange != "undefined") {
+      if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
         const range = document.createRange();
         range.selectNodeContents(el);
         range.collapse(false);
@@ -262,6 +222,13 @@
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     }
+
+    // NOVO: aplicar negrito, itálico, sublinhado
+    function formatText(command) {
+      document.execCommand(command, false, null);
+      output.focus();
+    }
   </script>
 </body>
 </html>
+
