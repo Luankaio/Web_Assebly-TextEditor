@@ -17,7 +17,7 @@
       transition: background 0.5s;
     }
 
-    h2 {
+   h2 {
       font-size: 2.2rem;
       color: #222c3c;
       margin-bottom: 18px;
@@ -69,7 +69,6 @@
       max-height: 700px;
       overflow-y: auto;
     }
-
     #output:focus {
       background: #eaf3ff;
       box-shadow: 0 0 0 2px #4caf50a0;
@@ -108,16 +107,13 @@
       position: relative;
       overflow: hidden;
     }
-
     button:active {
       transform: scale(0.97);
     }
-
     button:hover {
       background: #d0e2ff;
       box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.10);
     }
-
     #saveBtn {
       background: linear-gradient(90deg, #4CAF50 60%, #43e97b 100%);
       color: white;
@@ -125,50 +121,28 @@
       box-shadow: 0 2px 12px 0 rgba(76, 175, 80, 0.10);
       border: none;
     }
-
     #saveBtn:hover {
       background: linear-gradient(90deg, #43e97b 60%, #38f9d7 100%);
       color: #fff;
     }
-
     #undoBtn, #redoBtn {
       min-width: 90px;
     }
-
     #undoBtn:before {
       content: "⎌ ";
       font-size: 1.1em;
       vertical-align: middle;
     }
-
     #redoBtn:before {
       content: "↻ ";
       font-size: 1.1em;
       vertical-align: middle;
     }
-
     #saveBtn:before {
       content: "💾 ";
       font-size: 1.1em;
       vertical-align: middle;
     }
-
-    #clearBtn {
-      background: linear-gradient(90deg, #ff6b6b 60%, #ffb86c 100%);
-      color: white;
-      font-weight: 600;
-    }
-
-    #clearBtn:hover {
-      background: linear-gradient(90deg, #ff8a8a 60%, #ffd98d 100%);
-    }
-
-    #clearBtn:before {
-      content: "🗑️ ";
-      font-size: 1.1em;
-      vertical-align: middle;
-    }
-
     .char-count {
       font-size: 0.95em;
       color: #8ca0b3;
@@ -176,7 +150,6 @@
       transition: color 0.2s;
       user-select: none;
     }
-
     .char-count.warning {
       color: #e57373;
       font-weight: 600;
@@ -194,19 +167,17 @@
     <div class="buttons">
       <button id="undoBtn">Desfazer</button>
       <button id="redoBtn">Refazer</button>
-      <button id="clearBtn">Limpar</button>
       <button id="saveBtn">Salvar como TXT</button>
     </div>
   </div>
   <script src="editor.js"></script>
   <script>
-    let insertChar, backspaceChar, getText, undoWord, redoWord, initEditor, clearAll;
+    let insertChar, backspaceChar, getText, undoWord, redoWord, initEditor;
 
     const output = document.getElementById('output');
     const undoBtn = document.getElementById('undoBtn');
     const redoBtn = document.getElementById('redoBtn');
     const saveBtn = document.getElementById('saveBtn');
-    const clearBtn = document.getElementById('clearBtn');
     const charCount = document.getElementById('charCount');
 
     Module.onRuntimeInitialized = function () {
@@ -216,16 +187,18 @@
       undoWord = Module.cwrap('undoWord', null, []);
       redoWord = Module.cwrap('redoWord', null, []);
       initEditor = Module.cwrap('initEditor', null, []);
-      clearAll = Module.cwrap('clearAll', null, []);
       initEditor();
 
+      // Entrada de texto
       output.addEventListener('keydown', (e) => {
         e.preventDefault();
+
         if (e.key === 'Backspace') {
           backspaceChar();
         } else if (e.key.length === 1) {
           insertChar(e.key.charCodeAt(0));
         }
+
         atualizarTexto();
       });
 
@@ -239,17 +212,11 @@
         atualizarTexto();
       });
 
-      clearBtn.addEventListener('click', () => {
-        if (confirm("Deseja realmente limpar todo o texto?")) {
-          clearAll();
-          atualizarTexto();
-        }
-      });
-
       saveBtn.addEventListener('click', () => {
         salvarComoTxt();
       });
 
+      // Atalho Ctrl+S para salvar
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
           e.preventDefault();
@@ -272,7 +239,8 @@
 
     function placeCaretAtEnd(el) {
       el.focus();
-      if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
+      if (typeof window.getSelection != "undefined"
+        && typeof document.createRange != "undefined") {
         const range = document.createRange();
         range.selectNodeContents(el);
         range.collapse(false);
@@ -282,7 +250,7 @@
       }
     }
 
-    function salvarComoTxt() {
+   function salvarComoTxt() {
       const texto = getText();
       const blob = new Blob([texto], { type: 'text/plain' });
       const url = window.URL.createObjectURL(blob);
@@ -293,7 +261,7 @@
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    }
+    } 
   </script>
 </body>
 </html>
