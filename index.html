@@ -191,24 +191,59 @@
       initEditor = Module.cwrap('initEditor', null, []);
       initEditor();
 
-      // Entrada de texto
-      output.addEventListener('keydown', (e) => {
-        e.preventDefault();
+      // Suporte a acentos e caracteres especiais
+      let textoAnterior = '';
 
-        if (e.key === 'Backspace') {
-          backspaceChar();
-        } else if (e.key === 'Enter') {
-          insertChar(10); // Código ASCII para quebra de linha
-        } else if (e.key === 'Tab') {
-          insertChar(9); // Código ASCII para tab
-        } else if (e.key === ' ') {
-          insertChar(32); // Código ASCII para espaço (garantindo múltiplos espaços)
-        } else if (e.key.length === 1) {
-          insertChar(e.key.charCodeAt(0));
-        }
 
-        atualizarTexto();
+
+      // Suporte a composição de caracteres (acentos)
+      let emComposicao = false;
+
+      output.addEventListener('compositionstart', () => {
+        emComposicao = true;
       });
+      output.addEventListener('compositionend', () => {
+        emComposicao = false;
+        sincronizarComC();
+      });
+
+      output.addEventListener('input', () => {
+        if (!emComposicao) {
+          sincronizarComC();
+        }
+      });
+
+      function sincronizarComC() {
+        // Captura o texto realmente inserido, incluindo acentos e ç
+        const textoAtual = output.textContent;
+        let i = 0;
+        // Encontra o ponto de diferença
+        while (i < textoAnterior.length && i < textoAtual.length && textoAnterior[i] === textoAtual[i]) {
+          i++;
+        }
+        // Se apagou
+        if (textoAtual.length < textoAnterior.length) {
+          for (let j = 0; j < textoAnterior.length - textoAtual.length; j++) {
+            backspaceChar();
+          }
+        } else {
+          // Se inseriu
+          const inserido = textoAtual.slice(i);
+          for (const char of inserido) {
+            // Codifica cada caractere em UTF-8 e envia byte a byte para o C
+            const utf8 = new TextEncoder().encode(char);
+            for (const byte of utf8) {
+              insertChar(byte);
+            }
+          }
+        }
+        // Sempre sincroniza o texto do div com o buffer do C
+        atualizarTexto();
+        textoAnterior = getText();
+      }
+
+      // Inicializa o texto anterior ao abrir
+      textoAnterior = getText();
 
       undoBtn.addEventListener('click', () => {
         undoWord();
