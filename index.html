@@ -68,6 +68,8 @@
       resize: vertical;
       max-height: 700px;
       overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     #output:focus {
       background: #eaf3ff;
@@ -232,7 +234,7 @@
     };
 
     function atualizarTexto() {
-      output.innerText = getText();
+      output.textContent = getText();
       atualizarContador();
       placeCaretAtEnd(output);
     }
