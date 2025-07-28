@@ -81,7 +81,10 @@ void clearRedoList() {
 
 void insertChar(char c) {
     push(&textStack, c);
-    clearRedoList();  // limpa histórico de redo ao digitar
+    // Só limpa redo se não for espaço
+    if (c != ' ') {
+        clearRedoList();
+    }
 }
 
 // Nova função para inserir strings UTF-8
@@ -90,7 +93,10 @@ void insertString(const char* str) {
     for (int i = 0; i < len; i++) {
         push(&textStack, str[i]);
     }
-    clearRedoList();
+    // Só limpa redo se não for espaço
+    if (str[0] != ' ') {
+        clearRedoList();
+    }
 }
 
 void backspaceChar() {
@@ -155,4 +161,9 @@ void redoWord() {
 void initEditor() {
     initStack(&textStack);
     clearRedoList();
+}
+
+// Função de debug para verificar tamanho da pilha
+int getStackSize() {
+    return textStack.top + 1;
 }
