@@ -9,6 +9,13 @@ Front utiliza webassembly para utilizar o C como back-end
 - **Pilha de caracteres**: Cada caractere digitado é empilhado
 - **Exibição em tempo real**: O texto aparece na tela conforme você digita
 - **Backspace funcional**: Remove o último caractere da pilha
+- **Suporte a espaços múltiplos**: Preserva quantos espaços você quiser entre caracteres
+- **Quebras de linha**: Suporte completo a Enter para múltiplas linhas
+- **Tabulação**: Suporte a Tab para indentação
+- **Interface expansiva**: Editor com área de trabalho ampla e redimensionável
+- **Undo/Redo**: Sistema de desfazer e refazer por palavras
+- **Formatação**: Botões para negrito e itálico
+- **Salvamento**: Exporta conteúdo como arquivo TXT
 
 ## Como usar
 
