@@ -174,7 +174,12 @@
   </div>
   <script src="editor.js"></script>
   <script>
-    let insertChar, backspaceChar, getText, undoWord, redoWord, initEditor;
+    let insertChar, insertString, backspaceChar, getText, undoWord, redoWord, initEditor;
+    
+    // Garantir que Module existe
+    if (typeof Module === 'undefined') {
+      var Module = {};
+    }
 
     const output = document.getElementById('output');
     const undoBtn = document.getElementById('undoBtn');
@@ -184,6 +189,7 @@
 
     Module.onRuntimeInitialized = function () {
       insertChar = Module.cwrap('insertChar', null, ['number']);
+      insertString = Module.cwrap('insertString', null, ['string']);
       backspaceChar = Module.cwrap('backspaceChar', null, []);
       getText = Module.cwrap('getText', 'string', []);
       undoWord = Module.cwrap('undoWord', null, []);
@@ -196,15 +202,22 @@
         e.preventDefault();
 
         if (e.key === 'Backspace') {
+          e.preventDefault();
           backspaceChar();
+          atualizarTexto();
         } else if (e.key === 'Enter') {
-          insertChar(10); // Código ASCII para quebra de linha
+          // Deixa o evento input lidar com isso
+          return;
         } else if (e.key === 'Tab') {
-          insertChar(9); // Código ASCII para tab
-        } else if (e.key === ' ') {
-          insertChar(32); // Código ASCII para espaço (garantindo múltiplos espaços)
+          e.preventDefault();
+          insertString('\t');
+          atualizarTexto();
+        } else if (e.ctrlKey || e.metaKey) {
+          // Permite atalhos de teclado como Ctrl+S
+          return;
         } else if (e.key.length === 1) {
-          insertChar(e.key.charCodeAt(0));
+          // Deixa o evento input lidar com todos os caracteres
+          return;
         }
 
         atualizarTexto();
