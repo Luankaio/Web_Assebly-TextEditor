@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 1000
-#define MAX_WORD_LEN 50
+#define MAX_SIZE 3000  // Aumentado para suportar UTF-8
+#define MAX_WORD_LEN 150  // Aumentado para palavras com acentos
 
 // =======================
 // Pilha (Stack) para texto
@@ -84,9 +84,24 @@ void insertChar(char c) {
     clearRedoList();  // limpa histórico de redo ao digitar
 }
 
+// Nova função para inserir strings UTF-8
+void insertString(const char* str) {
+    int len = strlen(str);
+    for (int i = 0; i < len; i++) {
+        push(&textStack, str[i]);
+    }
+    clearRedoList();
+}
+
 void backspaceChar() {
     if (!isEmpty(&textStack)) {
-        pop(&textStack);
+        char last = pop(&textStack);
+        
+        // Se é um byte de continuação UTF-8 (10xxxxxx), remove bytes anteriores também
+        while (!isEmpty(&textStack) && (last & 0xC0) == 0x80) {
+            last = pop(&textStack);
+        }
+        
         clearRedoList();  // limpa histórico de redo ao apagar
     }
 }

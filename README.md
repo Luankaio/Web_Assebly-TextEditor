@@ -12,6 +12,7 @@ Front utiliza webassembly para utilizar o C como back-end
 - **Suporte a espaços múltiplos**: Preserva quantos espaços você quiser entre caracteres
 - **Quebras de linha**: Suporte completo a Enter para múltiplas linhas
 - **Tabulação**: Suporte a Tab para indentação
+- **Caracteres especiais**: Suporte completo a acentos (á, é, í, ó, ú, ã, õ, ç) e caracteres UTF-8
 - **Interface expansiva**: Editor com área de trabalho ampla e redimensionável
 - **Undo/Redo**: Sistema de desfazer e refazer por palavras
 - **Formatação**: Botões para negrito e itálico

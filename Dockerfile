@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN emcc editor.c -o editor.js \
-  -sEXPORTED_FUNCTIONS=_insertChar,_backspaceChar,_getText,_undoWord,_redoWord,_initEditor \
+  -sEXPORTED_FUNCTIONS=_insertChar,_insertString,_backspaceChar,_getText,_undoWord,_redoWord,_initEditor \
   -sEXPORTED_RUNTIME_METHODS=ccall,cwrap \
   -sALLOW_MEMORY_GROWTH=1
 
