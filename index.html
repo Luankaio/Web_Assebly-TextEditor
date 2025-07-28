@@ -265,7 +265,7 @@
     <div id="output" contenteditable="true"></div>
     <div class="editor-footer">
       <span class="char-count" id="charCount">0 caracteres</span>
-      <span style="font-size:0.95em;opacity:0.7;">Ctrl+S para salvar</span>
+      <span style="font-size:0.9em;opacity:0.7;">Ctrl+Z: Desfazer | Ctrl+Y: Refazer | Ctrl+S: Salvar</span>
     </div>
     <div class="buttons">
       <button id="undoBtn">Desfazer</button>
@@ -360,11 +360,19 @@
         salvarComoTxt();
       });
 
-      // Atalho Ctrl+S para salvar
+      // Atalhos de teclado
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
           e.preventDefault();
           salvarComoTxt();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+          e.preventDefault();
+          undoWord();
+          atualizarTexto();
+        } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          redoWord();
+          atualizarTexto();
         }
       });
     };
