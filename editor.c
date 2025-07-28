@@ -1,169 +1,172 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 3000  // Aumentado para suportar UTF-8
-#define MAX_WORD_LEN 150  // Aumentado para palavras com acentos
+// Defines ajustados para suporte ampliado
+#define MAX_BUFFER 3000
+#define MAX_PALAVRA 150
 
-// =======================
-// Pilha (Stack) para texto
-// =======================
+// ======================
+// Estrutura da pilha
+// ======================
 
 typedef struct {
-    char data[MAX_SIZE];
-    int top;
-} Stack;
+    char conteudo[MAX_BUFFER];
+    int topo;
+} Pilha;
 
-Stack textStack;
+Pilha pilhaTexto;
 
-void initStack(Stack *s) {
-    s->top = -1;
+void inicializarPilha(Pilha *p) {
+    p->topo = -1;
 }
 
-int isEmpty(Stack *s) {
-    return s->top == -1;
+int pilhaVazia(Pilha *p) {
+    return p->topo == -1;
 }
 
-int isFull(Stack *s) {
-    return s->top == MAX_SIZE - 1;
+int pilhaCheia(Pilha *p) {
+    return p->topo == MAX_BUFFER - 1;
 }
 
-void push(Stack *s, char c) {
-    if (!isFull(s)) {
-        s->data[++s->top] = c;
+void empilhar(Pilha *p, char caractere) {
+    if (!pilhaCheia(p)) {
+        p->conteudo[++p->topo] = caractere;
     }
 }
 
-char pop(Stack *s) {
-    if (!isEmpty(s)) {
-        return s->data[s->top--];
+char desempilhar(Pilha *p) {
+    if (!pilhaVazia(p)) {
+        return p->conteudo[p->topo--];
     }
     return '\0';
 }
 
-// =======================
-// linked list para redo
-// =======================
+// ======================
+// Lista para refazer
+// ======================
 
-typedef struct WordNode {
-    char word[MAX_WORD_LEN];
-    struct WordNode* next;
-} WordNode;
+typedef struct NoPalavra {
+    char palavra[MAX_PALAVRA];
+    struct NoPalavra* proximo;
+} NoPalavra;
 
-WordNode* redoHead = NULL;  // topo da pilha de palavras desfeitas
+NoPalavra* cabecaRefazer = NULL;
 
-void pushRedoWord(const char* word) {
-    WordNode* node = (WordNode*)malloc(sizeof(WordNode));
-    strcpy(node->word, word);
-    node->next = redoHead;
-    redoHead = node;
+void empilharPalavraRefazer(const char* palavra) {
+    NoPalavra* novoNo = (NoPalavra*)malloc(sizeof(NoPalavra));
+    strcpy(novoNo->palavra, palavra);
+    novoNo->proximo = cabecaRefazer;
+    cabecaRefazer = novoNo;
 }
 
-char* popRedoWord() {
-    if (redoHead == NULL) return NULL;
-    WordNode* temp = redoHead;
-    redoHead = redoHead->next;
-    char* result = strdup(temp->word);  // copia a palavra antes de liberar
+char* desempilharPalavraRefazer() {
+    if (cabecaRefazer == NULL) return NULL;
+    
+    NoPalavra* temp = cabecaRefazer;
+    cabecaRefazer = cabecaRefazer->proximo;
+    char* resultado = strdup(temp->palavra);
     free(temp);
-    return result;
+    return resultado;
 }
 
-void clearRedoList() {
-    while (redoHead != NULL) {
-        WordNode* temp = redoHead;
-        redoHead = redoHead->next;
+void limparListaRefazer() {
+    while (cabecaRefazer != NULL) {
+        NoPalavra* temp = cabecaRefazer;
+        cabecaRefazer = cabecaRefazer->proximo;
         free(temp);
     }
 }
 
-// =======================
-// Funções principais
-// =======================
+// ======================
+// Núcleo funcional
+// ======================
 
-void insertChar(char c) {
-    push(&textStack, c);
-    // Só limpa redo se não for espaço
+void inserirCaractere(char c) {
+    empilhar(&pilhaTexto, c);
+    // Limpa histórico ao inserir novo conteúdo
     if (c != ' ') {
-        clearRedoList();
+        limparListaRefazer();
     }
 }
 
-// Nova função para inserir strings UTF-8
-void insertString(const char* str) {
-    int len = strlen(str);
-    for (int i = 0; i < len; i++) {
-        push(&textStack, str[i]);
+void inserirStringUTF8(const char* str) {
+    int comprimento = strlen(str);
+    int posicao = 0;
+    while (posicao < comprimento) {
+        empilhar(&pilhaTexto, str[posicao++]);
     }
-    // Só limpa redo se não for espaço
     if (str[0] != ' ') {
-        clearRedoList();
+        limparListaRefazer();
     }
 }
 
-void backspaceChar() {
-    if (!isEmpty(&textStack)) {
-        char last = pop(&textStack);
+void apagarCaractere() {
+    if (!pilhaVazia(&pilhaTexto)) {
+        char removido = desempilhar(&pilhaTexto);
         
-        // Se é um byte de continuação UTF-8 (10xxxxxx), remove bytes anteriores também
-        while (!isEmpty(&textStack) && (last & 0xC0) == 0x80) {
-            last = pop(&textStack);
+        // Trata caracteres multibyte UTF-8
+        while (!pilhaVazia(&pilhaTexto) && (removido & 0xC0) == 0x80) {
+            removido = desempilhar(&pilhaTexto);
         }
         
-        clearRedoList();  // limpa histórico de redo ao apagar
+        limparListaRefazer();
     }
 }
 
-const char* getText() {
-    static char buffer[MAX_SIZE + 1];
-    for (int i = 0; i <= textStack.top; i++) {
-        buffer[i] = textStack.data[i];
+const char* obterTexto() {
+    static char buffer[MAX_BUFFER + 1];
+    for (int idx = 0; idx <= pilhaTexto.topo; idx++) {
+        buffer[idx] = pilhaTexto.conteudo[idx];
     }
-    buffer[textStack.top + 1] = '\0';
+    buffer[pilhaTexto.topo + 1] = '\0';
     return buffer;
 }
 
-// Desfaz uma palavra e salva na lista ligada
-void undoWord() {
-    if (isEmpty(&textStack)) return;
+void desfazerPalavra() {
+    if (pilhaVazia(&pilhaTexto)) return;
 
-    char word[MAX_WORD_LEN];
-    int i = 0;
+    char palavraTemp[MAX_PALAVRA];
+    int contador = 0;
 
-    // Remove até espaço ou início da pilha
-    while (!isEmpty(&textStack) && i < MAX_WORD_LEN - 1) {
-        char c = pop(&textStack);
-        word[i++] = c;
-        if (c == ' ' || c == '\t' || c == '\n') break;
+    // Coleta caracteres até espaço ou início
+    while (!pilhaVazia(&pilhaTexto)) {
+        char c = desempilhar(&pilhaTexto);
+        palavraTemp[contador++] = c;
+        if (c == ' ' || contador >= MAX_PALAVRA - 1) break;
     }
 
-    // Inverter para armazenar corretamente
-    for (int j = 0; j < i / 2; j++) {
-        char temp = word[j];
-        word[j] = word[i - j - 1];
-        word[i - j - 1] = temp;
+    // Inverte a sequência
+    int inicio = 0, fim = contador - 1;
+    while (inicio < fim) {
+        char temp = palavraTemp[inicio];
+        palavraTemp[inicio] = palavraTemp[fim];
+        palavraTemp[fim] = temp;
+        inicio++;
+        fim--;
     }
-    word[i] = '\0';
+    palavraTemp[contador] = '\0';
 
-    pushRedoWord(word);
+    empilharPalavraRefazer(palavraTemp);
 }
 
-// Refaz a última palavra da lista ligada
-void redoWord() {
-    char* word = popRedoWord();
-    if (!word) return;
+void refazerPalavra() {
+    char* palavra = desempilharPalavraRefazer();
+    if (!palavra) return;
 
-    for (int i = 0; word[i] != '\0'; i++) {
-        push(&textStack, word[i]);
+    int idx = 0;
+    while (palavra[idx]) {
+        empilhar(&pilhaTexto, palavra[idx++]);
     }
-    free(word);  // liberar a cópia
+    free(palavra);
 }
 
-// Inicializa o editor
-void initEditor() {
-    initStack(&textStack);
-    clearRedoList();
+// Configuração inicial
+void iniciarEditor() {
+    inicializarPilha(&pilhaTexto);
+    limparListaRefazer();
 }
 
-// Função de debug para verificar tamanho da pilha
-int getStackSize() {
-    return textStack.top + 1;
+// Função auxiliar para debug
+int tamanhoAtualPilha() {
+    return pilhaTexto.topo + 1;
 }
